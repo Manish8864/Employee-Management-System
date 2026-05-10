@@ -1,0 +1,34 @@
+
+  const handleEditDetailsToggle = () => {
+    if (selectedManager) {
+      setEditDetailsForm({
+        name: selectedManager.name || '',
+        email: selectedManager.email || '',
+        department: selectedManager.department || '',
+        phone: selectedManager.phone || '',
+        address: selectedManager.address || ''
+      });
+    }
+    setEditDetailsMode(!editDetailsMode);
+    setEditDetailsMsg('');
+  };
+
+  const handleEditDetailsChange = (e) => {
+    setEditDetailsForm({ ...editDetailsForm, [e.target.name]: e.target.value });
+  };
+
+  const handleEditDetailsSubmit = async (e) => {
+    e.preventDefault();
+    setEditDetailsMsg('');
+    try {
+      const res = await api.put('/auth/managers/' + selectedManager._id, editDetailsForm);
+      setEditDetailsMsg('Personal details updated successfully!');
+      setEditDetailsMode(false);
+      fetchCurrentUser();
+      setTimeout(() => setEditDetailsMsg(''), 3000);
+    } catch (err) {
+      setEditDetailsMsg(err.response?.data?.message || 'Failed to update details');
+    }
+  };
+
+

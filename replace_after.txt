@@ -1,0 +1,6 @@
+                        <button className="btn btn-primary" style={{ marginTop: '20px' }} onClick={() => setEditProfileMode(true)}>Edit My Profile</button>
+                        <button className="btn btn-warning" style={{ marginTop: '20px', marginLeft: '10px', color: '#fff' }} onClick={handleEditDetailsToggle}>Edit Personal Details</button>
+                      </>
+                    )}
+                  </>
+                ) : (

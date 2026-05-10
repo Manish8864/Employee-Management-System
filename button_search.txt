@@ -1,0 +1,1 @@
+<button className="btn btn-primary" style={{ marginTop: '20px' }} onClick={() => setEditProfileMode(true)}>Edit My Profile</button>

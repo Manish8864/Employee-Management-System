@@ -1,0 +1,302 @@
+import React, { useState, useEffect } from 'react';
+import api from '../../api/axios';
+
+const AllManagers = () => {
+  const [managers, setManagers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // Add Manager form states
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [addFormData, setAddFormData] = useState({
+    name: '', email: '', password: '', role: 'manager', department: '', phone: '', address: ''
+  });
+  const [addLoading, setAddLoading] = useState(false);
+  const [addMessage, setAddMessage] = useState('');
+  const [addError, setAddError] = useState('');
+
+  // Details modal states
+  const [selectedManager, setSelectedManager] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
+  const [editProfileMode, setEditProfileMode] = useState(false);
+  const [profileForm, setProfileForm] = useState({ bio: '', skills: '', linkedin: '', twitter: '' });
+  const [profileMsg, setProfileMsg] = useState('');
+
+
+  const fetchManagers = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/auth/managers');
+      setManagers(res.data);
+      setError('');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to fetch managers');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCurrentUser = async () => {
+    try {
+      const res = await api.get('/auth/me');
+      setCurrentUser(res.data);
+      setProfileForm({
+        bio: res.data.bio || '',
+        skills: res.data.skills || '',
+        linkedin: res.data.linkedin || '',
+        twitter: res.data.twitter || ''
+      });
+    } catch (err) {
+      console.error('Failed to fetch current user');
+    }
+  };
+
+  useEffect(() => {
+    fetchManagers();
+    fetchCurrentUser();
+  }, []);
+
+  const handleViewDetails = async (manager) => {
+    try {
+      setDetailsLoading(true);
+      const res = await api.get(`/auth/managers/${manager._id}`);
+      setSelectedManager(res.data);
+      setShowDetailsModal(true);
+      setIsOwnProfile(currentUser && currentUser._id === manager._id);
+      setEditProfileMode(false);
+      setProfileMsg('');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to fetch manager details');
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/auth/managers/${id}`);
+      setMessage('Manager deleted successfully');
+      setDeleteConfirm(null);
+      fetchManagers();
+      setTimeout(() => setMessage(''), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to delete manager');
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
+  const handleAddChange = (e) => {
+    setAddFormData({ ...addFormData, [e.target.name]: e.target.value });
+  };
+
+
+  const handleAddSubmit = async (e) => {
+    e.preventDefault();
+    setAddMessage('');
+    setAddError('');
+    setAddLoading(true);
+    try {
+      await api.post('/auth/add-manager', addFormData);
+      setAddMessage('Manager registered successfully!');
+      setAddFormData({ name: '', email: '', password: '', role: 'manager', department: '', phone: '', address: '' });
+      setShowAddForm(false);
+      fetchManagers();
+      setTimeout(() => setAddMessage(''), 3000);
+    } catch (err) {
+      setAddError(err.response?.data?.message || 'Registration failed');
+    } finally {
+      setAddLoading(false);
+    }
+  };
+
+  const handleProfileChange = (e) => {
+    setProfileForm({ ...profileForm, [e.target.name]: e.target.value });
+  };
+
+  const handleProfileSubmit = async (e) => {
+    e.preventDefault();
+    setProfileMsg('');
+    try {
+      await api.put('/auth/profile', profileForm);
+      setProfileMsg('Profile updated successfully!');
+      setEditProfileMode(false);
+      fetchCurrentUser();
+      setTimeout(() => setProfileMsg(''), 3000);
+    } catch (err) {
+      setProfileMsg(err.response?.data?.message || 'Failed to update profile');
+    }
+  };
+
+
+  if (loading) return <div>Loading managers...</div>;
+
+
+  return (
+    <div>
+      <div className="page-header">
+        <h2>All Managers</h2>
+      </div>
+
+      {message && <div style={{ background: '#d4edda', padding: '10px', borderRadius: '5px', marginBottom: '15px' }}>{message}</div>}
+      {error && <div style={{ background: '#f8d7da', color: '#721c24', padding: '10px', borderRadius: '5px', marginBottom: '15px' }}>{error}</div>}
+
+      <div className="card">
+        <div style={{ marginBottom: '20px' }}>
+          <button className="btn btn-success" onClick={() => setShowAddForm(!showAddForm)} style={{ marginBottom: '10px' }}>
+            {showAddForm ? 'Cancel' : 'Add Manager'}
+          </button>
+        </div>
+
+        {showAddForm && (
+          <div style={{ marginBottom: '20px' }}>
+            {addMessage && <div style={{ background: '#d4edda', padding: '10px', borderRadius: '5px', marginBottom: '15px' }}>{addMessage}</div>}
+            {addError && <div style={{ background: '#f8d7da', color: '#721c24', padding: '10px', borderRadius: '5px', marginBottom: '15px' }}>{addError}</div>}
+            <form onSubmit={handleAddSubmit}>
+              <div className="form-group">
+                <label>Name</label>
+                <input type="text" name="name" className="form-control" value={addFormData.name} onChange={handleAddChange} required />
+              </div>
+              <div className="form-group">
+                <label>Email</label>
+                <input type="email" name="email" className="form-control" value={addFormData.email} onChange={handleAddChange} required />
+              </div>
+              <div className="form-group">
+                <label>Password</label>
+                <input type="password" name="password" className="form-control" value={addFormData.password} onChange={handleAddChange} required />
+              </div>
+              <div className="form-group">
+                <label>Department</label>
+                <input type="text" name="department" className="form-control" value={addFormData.department} onChange={handleAddChange} />
+              </div>
+              <div className="form-group">
+                <label>Phone</label>
+                <input type="text" name="phone" className="form-control" value={addFormData.phone} onChange={handleAddChange} />
+              </div>
+              <div className="form-group">
+                <label>Address</label>
+                <textarea name="address" className="form-control" rows="3" value={addFormData.address} onChange={handleAddChange} />
+              </div>
+              <button type="submit" className="btn btn-success" disabled={addLoading}>{addLoading ? 'Adding...' : 'Add Manager'}</button>
+            </form>
+          </div>
+        )}
+
+        {managers.length === 0 ? (
+          <p style={{ color: '#888', textAlign: 'center', padding: '20px' }}>No managers found.</p>
+        ) : (
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Department</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Join Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {managers.map((manager) => (
+                <tr key={manager._id}>
+                  <td>{manager.name || '-'}</td>
+                  <td>{manager.email}</td>
+                  <td>{manager.department || '-'}</td>
+                  <td>{manager.phone || '-'}</td>
+                  <td>{manager.address || '-'}</td>
+                  <td>{new Date(manager.joinDate).toLocaleDateString()}</td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '5px' }}>
+                      <button className="btn btn-primary" style={{ padding: '4px 8px', fontSize: '12px' }} onClick={() => handleViewDetails(manager)}>View</button>
+                      {deleteConfirm === manager._id ? (
+                        <>
+                          <button className="btn btn-danger" style={{ padding: '4px 8px', fontSize: '12px' }} onClick={() => handleDelete(manager._id)}>Confirm</button>
+                          <button className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: '12px' }} onClick={() => setDeleteConfirm(null)}>Cancel</button>
+                        </>
+                      ) : (
+                        <button className="btn btn-danger" style={{ padding: '4px 8px', fontSize: '12px' }} onClick={() => setDeleteConfirm(manager._id)}>Remove</button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {showDetailsModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', width: '90%', maxWidth: '600px', maxHeight: '80vh', overflowY: 'auto' }}>
+            {detailsLoading ? <p>Loading...</p> : selectedManager ? (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                  <h3>{isOwnProfile ? 'My Profile' : 'Manager Profile'}</h3>
+                  <button onClick={() => { setShowDetailsModal(false); setEditProfileMode(false); }} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}>&times;</button>
+                </div>
+                {profileMsg && <div style={{ background: '#d4edda', padding: '10px', borderRadius: '5px', marginBottom: '15px' }}>{profileMsg}</div>}
+                {!editProfileMode ? (
+                  <>
+                    <div style={{ display: 'grid', gap: '15px' }}>
+                      <div><strong>Name:</strong> {selectedManager.name || '-'}</div>
+                      <div><strong>Email:</strong> {selectedManager.email || '-'}</div>
+                      <div><strong>Employee ID:</strong> {selectedManager.empId || '-'}</div>
+                      <div><strong>Department:</strong> {selectedManager.department || '-'}</div>
+                      <div><strong>Phone:</strong> {selectedManager.phone || '-'}</div>
+                      <div><strong>Address:</strong> {selectedManager.address || '-'}</div>
+                      <div><strong>Role:</strong> {selectedManager.role || '-'}</div>
+                      <div><strong>Join Date:</strong> {selectedManager.joinDate ? new Date(selectedManager.joinDate).toLocaleDateString() : '-'}</div>
+                      {selectedManager.avatar && <div><strong>Avatar:</strong><br /><img src={selectedManager.avatar} alt="Avatar" style={{ width: '80px', height: '80px', borderRadius: '50%', marginTop: '5px' }} /></div>}
+                    </div>
+                    {isOwnProfile && (
+                      <>
+                        <hr style={{ margin: '20px 0', border: 'none', borderTop: '1px solid #eee' }} />
+                        <h4 style={{ marginBottom: '15px' }}>Manager Profile Details</h4>
+                        <div style={{ display: 'grid', gap: '15px' }}>
+                          <div><strong>Bio:</strong><p style={{ margin: '5px 0', color: '#666' }}>{selectedManager.bio || 'Not added yet'}</p></div>
+                          <div><strong>Skills:</strong><p style={{ margin: '5px 0', color: '#666' }}>{selectedManager.skills || 'Not added yet'}</p></div>
+                          <div><strong>LinkedIn:</strong><p style={{ margin: '5px 0', color: '#666' }}>{selectedManager.linkedin || 'Not added yet'}</p></div>
+                          <div><strong>Twitter:</strong><p style={{ margin: '5px 0', color: '#666' }}>{selectedManager.twitter || 'Not added yet'}</p></div>
+                        </div>
+                        <button className="btn btn-primary" style={{ marginTop: '20px' }} onClick={() => setEditProfileMode(true)}>Edit My Profile</button>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <form onSubmit={handleProfileSubmit}>
+                    <h4 style={{ marginBottom: '15px' }}>Edit Profile</h4>
+                    <div className="form-group">
+                      <label>Bio</label>
+                      <textarea name="bio" className="form-control" rows="3" value={profileForm.bio} onChange={handleProfileChange} placeholder="Tell others about yourself..." />
+                    </div>
+                    <div className="form-group">
+                      <label>Skills</label>
+                      <input type="text" name="skills" className="form-control" value={profileForm.skills} onChange={handleProfileChange} placeholder="e.g., JavaScript, React, Node.js" />
+                    </div>
+                    <div className="form-group">
+                      <label>LinkedIn</label>
+                      <input type="text" name="linkedin" className="form-control" value={profileForm.linkedin} onChange={handleProfileChange} placeholder="LinkedIn profile URL" />
+                    </div>
+                    <div className="form-group">
+                      <label>Twitter</label>
+                      <input type="text" name="twitter" className="form-control" value={profileForm.twitter} onChange={handleProfileChange} placeholder="Twitter handle or profile URL" />
+                    </div>
+                    <button type="submit" className="btn btn-success">Save Profile</button>
+                    <button type="button" className="btn btn-secondary" style={{ marginLeft: '10px' }} onClick={() => setEditProfileMode(false)}>Cancel</button>
+                  </form>
+                )}
+              </>
+            ) : <p>No details available.</p>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default AllManagers;

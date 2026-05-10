@@ -1,0 +1,33 @@
+﻿import React, { useState, useEffect } from 'react';
+import api from '../../api/axios';
+
+const AllManagers = () => {
+  const [managers, setManagers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // Add Manager form states
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [addFormData, setAddFormData] = useState({
+    name: '', email: '', password: '', role: 'manager', department: '', phone: '', address: ''
+  });
+  const [addLoading, setAddLoading] = useState(false);
+  const [addMessage, setAddMessage] = useState('');
+  const [addError, setAddError] = useState('');
+
+  // Details modal states
+  const [selectedManager, setSelectedManager] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
+  const [editProfileMode, setEditProfileMode] = useState(false);
+  const [profileForm, setProfileForm] = useState({ bio: '', skills: '', linkedin: '', twitter: '' });
+  const [profileMsg, setProfileMsg] = useState('');
+
+  // Edit personal details states
+  const [editDetailsMode, setEditDetailsMode] = useState(false);
+  const [editDetailsForm, setEditDetailsForm] = useState({ name: '', email: '', department: '', phone: '', address: '' });
+  const [editDetailsMsg, setEditDetailsMsg] = useState('');

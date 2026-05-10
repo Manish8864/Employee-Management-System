@@ -1,0 +1,155 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import PrivateRoute from './components/PrivateRoute';
+import Sidebar from './components/Sidebar';
+
+import Login from './pages/Login';
+import Register from './pages/Register';
+
+// Employee
+import EmployeeDashboard from './pages/employee/EmployeeDashboard';
+import PersonalDetails from './pages/employee/PersonalDetails';
+import Attendance from './pages/employee/Attendance';
+import MyProjects from './pages/employee/MyProjects';
+import WeeklyReport from './pages/employee/WeeklyReport';
+import EmployeeLeave from './pages/employee/EmployeeLeave';
+
+// Manager
+import ManagerDashboard from './pages/manager/ManagerDashboard';
+import AllEmployees from './pages/manager/AllEmployees';
+import LeaveManagement from './pages/manager/LeaveManagement';
+import ReportsView from './pages/manager/ReportsView';
+import AddEmployee from './pages/manager/AddEmployee';
+import AllManagers from './pages/manager/AllManagers';
+import ManagerAttendance from './pages/manager/ManagerAttendance';
+import AssignProject from './pages/manager/AssignProject';
+import Notifications from './pages/manager/Notifications';
+
+const DashboardLayout = ({ children }) => {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" />;
+
+  return (
+    <div className="dashboard-layout">
+      <Sidebar />
+      <div className="main-content-modern">
+        {children}
+      </div>
+    </div>
+  );
+};
+
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <Routes>
+
+          {/* Public */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* Employee */}
+          <Route path="/employee" element={
+            <PrivateRoute allowedRoles={['employee']}>
+              <DashboardLayout><EmployeeDashboard /></DashboardLayout>
+            </PrivateRoute>
+          } />
+
+          <Route path="/employee/details" element={
+            <PrivateRoute allowedRoles={['employee']}>
+              <DashboardLayout><PersonalDetails /></DashboardLayout>
+            </PrivateRoute>
+          } />
+
+          <Route path="/employee/attendance" element={
+            <PrivateRoute allowedRoles={['employee']}>
+              <DashboardLayout><Attendance /></DashboardLayout>
+            </PrivateRoute>
+          } />
+
+          <Route path="/employee/leave" element={
+            <PrivateRoute allowedRoles={['employee']}>
+              <DashboardLayout><EmployeeLeave /></DashboardLayout>
+            </PrivateRoute>
+          } />
+
+          <Route path="/employee/projects" element={
+            <PrivateRoute allowedRoles={['employee']}>
+              <DashboardLayout><MyProjects /></DashboardLayout>
+            </PrivateRoute>
+          } />
+
+          <Route path="/employee/reports" element={
+            <PrivateRoute allowedRoles={['employee']}>
+              <DashboardLayout><WeeklyReport /></DashboardLayout>
+            </PrivateRoute>
+          } />
+
+          {/* Manager */}
+          <Route path="/manager" element={
+            <PrivateRoute allowedRoles={['manager']}>
+              <DashboardLayout><ManagerDashboard /></DashboardLayout>
+            </PrivateRoute>
+          } />
+
+          <Route path="/manager/employees" element={
+            <PrivateRoute allowedRoles={['manager']}>
+              <DashboardLayout><AllEmployees /></DashboardLayout>
+            </PrivateRoute>
+          } />
+
+          <Route path="/manager/add-employee" element={
+            <PrivateRoute allowedRoles={['manager']}>
+              <DashboardLayout><AddEmployee /></DashboardLayout>
+            </PrivateRoute>
+          } />
+
+          <Route path="/manager/managers" element={
+            <PrivateRoute allowedRoles={['manager']}>
+              <DashboardLayout><AllManagers /></DashboardLayout>
+            </PrivateRoute>
+          } />
+
+          <Route path="/manager/leaves" element={
+            <PrivateRoute allowedRoles={['manager']}>
+              <DashboardLayout><LeaveManagement /></DashboardLayout>
+            </PrivateRoute>
+          } />
+
+          <Route path="/manager/reports" element={
+            <PrivateRoute allowedRoles={['manager']}>
+              <DashboardLayout><ReportsView /></DashboardLayout>
+            </PrivateRoute>
+          } />
+
+          <Route path="/manager/attendance" element={
+            <PrivateRoute allowedRoles={['manager']}>
+              <DashboardLayout><ManagerAttendance /></DashboardLayout>
+            </PrivateRoute>
+          } />
+
+          <Route path="/manager/assign-project" element={
+            <PrivateRoute allowedRoles={['manager']}>
+              <DashboardLayout><AssignProject /></DashboardLayout>
+            </PrivateRoute>
+          } />
+
+          <Route path="/manager/notifications" element={
+            <PrivateRoute allowedRoles={['manager']}>
+              <DashboardLayout><Notifications /></DashboardLayout>
+            </PrivateRoute>
+          } />
+
+          {/* Default */}
+          <Route path="/" element={<Navigate to="/login" />} />
+
+        </Routes>
+      </Router>
+    </AuthProvider>
+  );
+}
+
+export default App;

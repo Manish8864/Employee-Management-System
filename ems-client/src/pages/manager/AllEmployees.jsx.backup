@@ -1,0 +1,184 @@
+import React, { useState, useEffect } from 'react';
+import api from '../../api/axios';
+
+const AllEmployees = () => {
+  const [employees, setEmployees] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  const fetchEmployees = async () => {
+    try {
+      const { data } = await api.get('/employees');
+      setEmployees(data);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const viewDetails = async (id) => {
+    try {
+      const { data } = await api.get(`/employees/${id}`);
+      setSelectedEmployee(data);
+      setShowModal(true);
+    } catch (error) {
+      console.error('Error fetching employee details:', error);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/employees/${id}`);
+      setMessage('Employee removed successfully');
+      setDeleteConfirm(null);
+      fetchEmployees();
+      setTimeout(() => setMessage(''), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to remove employee');
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
+  const getDisplayId = (emp) => {
+    return emp.empId || emp._id.slice(-6);
+  };
+
+  const getAvatarUrl = (avatar, name) => {
+    if (!avatar) {
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'E')}&size=128&background=4F46E5&color=fff`;
+    }
+    return avatar.startsWith('http') ? avatar : `http://localhost:5000${avatar}`;
+  };
+
+  if (loading) return <div>Loading...</div>;
+
+  return (
+    <div>
+      <div className="page-header">
+        <h2>All Employees</h2>
+      </div>
+
+      {message && (
+        <div style={{ background: '#d4edda', padding: '10px', borderRadius: '5px', marginBottom: '15px' }}>
+          {message}
+        </div>
+      )}
+
+      {error && (
+        <div style={{ background: '#f8d7da', color: '#721c24', padding: '10px', borderRadius: '5px', marginBottom: '15px' }}>
+          {error}
+        </div>
+      )}
+
+      <div className="card">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Department</th>
+              <th>Role</th>
+              <th>Join Date</th>
+              <th>DOB</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {employees.map((emp) => (
+              <tr key={emp._id}>
+                <td>{emp.name}</td>
+                <td>{emp.email}</td>
+                <td>{emp.department || 'N/A'}</td>
+                <td><span className={`badge badge-${emp.role === 'manager' ? 'info' : 'success'}`}>{emp.role}</span></td>
+                <td>{new Date(emp.joinDate).toLocaleDateString()}</td>
+                <td>{emp.dob ? new Date(emp.dob).toLocaleDateString() : 'N/A'}</td>
+                <td>
+                  {deleteConfirm === emp._id ? (
+                    <div style={{ display: 'flex', gap: '5px' }}>
+                      <button 
+                        className="btn btn-danger" 
+                        style={{ padding: '4px 8px', fontSize: '12px' }}
+                        onClick={() => handleDelete(emp._id)}
+                      >
+                        Confirm
+                      </button>
+                      <button 
+                        className="btn btn-secondary" 
+                        style={{ padding: '4px 8px', fontSize: '12px' }}
+                        onClick={() => setDeleteConfirm(null)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <button className="btn btn-primary" style={{ padding: '5px 10px', fontSize: '12px', marginRight: '5px' }} onClick={() => viewDetails(emp._id)}>View</button>
+                      <button 
+                        className="btn btn-danger" 
+                        style={{ padding: '5px 10px', fontSize: '12px' }}
+                        onClick={() => setDeleteConfirm(emp._id)}
+                      >
+                        Remove
+                      </button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {showModal && selectedEmployee && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Employee Details</h3>
+              <button className="close-btn" onClick={() => setShowModal(false)}>&times;</button>
+            </div>
+            <div className="modal-body">
+              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <img 
+                  src={getAvatarUrl(selectedEmployee.avatar, selectedEmployee.name)} 
+                  alt={selectedEmployee.name} 
+                  style={{ 
+                    width: '120px', 
+                    height: '120px', 
+                    borderRadius: '50%', 
+                    objectFit: 'cover',
+                    border: '4px solid #e5e7eb',
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                  }} 
+                />
+                <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
+                  Profile Picture
+                </p>
+              </div>
+              
+              <p><strong>Employee ID:</strong> <span style={{color: '#666', fontFamily: 'monospace'}}>{getDisplayId(selectedEmployee)}</span></p>
+              <p><strong>Name:</strong> {selectedEmployee.name}</p>
+              <p><strong>Email:</strong> {selectedEmployee.email}</p>
+              <p><strong>Role:</strong> <span className={`badge badge-${selectedEmployee.role === 'manager' ? 'info' : 'success'}`}>{selectedEmployee.role}</span></p>
+              <p><strong>Department:</strong> {selectedEmployee.department || 'N/A'}</p>
+              <p><strong>Phone:</strong> {selectedEmployee.phone || 'N/A'}</p>
+              <p><strong>Address:</strong> {selectedEmployee.address || 'N/A'}</p>
+              <p><strong>Join Date:</strong> {new Date(selectedEmployee.joinDate).toLocaleDateString()}</p>
+              <p><strong>Date of Birth:</strong> {selectedEmployee.dob ? new Date(selectedEmployee.dob).toLocaleDateString() : 'N/A'}</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default AllEmployees;

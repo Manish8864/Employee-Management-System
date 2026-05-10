@@ -1,0 +1,1 @@
+var fs=require("fs");var c=fs.readFileSync("c:\\Users\\Manish\\OneDrive\\Desktop\\employee-management-system\\ems-client\\src\\App.jsx","utf8");c=c.split("#]"+String.fromCharCode(62)).join("}>"+String.fromCharCode(62));fs.writeFileSync("c:\\Users\\Manish\\OneDrive\\Desktop\\employee-management-system\\ems-client\\src\\App.jsx",c);console.log("done")
