@@ -42,81 +42,79 @@ const Register = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-box">
-
-        <h2>Employee Registration</h2>
+    <div className="login-professional-container fade-in">
+      <div className="login-glass-card">
+        <div className="login-header">
+          <div className="logo">🧑‍💼‍🚀 EMS</div>
+          <h2>Employee Registration</h2>
+          <p className="subtitle">Create your employee account</p>
+        </div>
 
         {error && (
-          <div style={{
-            background: '#f8d7da',
-            color: '#721c24',
-            padding: '10px',
-            borderRadius: '5px',
-            marginBottom: '15px'
-          }}>
+          <div className="error-alert-modern shake">
+            <span className="error-icon">⚠️</span>
             {error}
           </div>
         )}
 
         {message && (
-          <div style={{
-            background: '#d4edda',
-            padding: '10px',
-            borderRadius: '5px',
-            marginBottom: '15px'
-          }}>
+          <div className="alert-modern alert-success">
             {message}
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Email</label>
+        <form onSubmit={handleSubmit} className="login-form-modern">
+          <div className="form-group-modern">
+            <label className="label-modern">Email</label>
             <input
               type="email"
               name="email"
-              className="form-control"
+              className="input-modern focus-glow"
               value={formData.email}
               onChange={handleChange}
               required
+              placeholder="manager@ems.com"
+              disabled={loading}
             />
           </div>
 
-          <div className="form-group">
-            <label>Password</label>
+          <div className="form-group-modern">
+            <label className="label-modern">Password</label>
             <input
               type="password"
               name="password"
-              className="form-control"
+              className="input-modern focus-glow"
               value={formData.password}
               onChange={handleChange}
               required
               minLength="6"
+              placeholder="••••••••••"
+              disabled={loading}
             />
           </div>
 
           <button
             type="submit"
-            className="btn btn-success"
-            style={{ width: '100%' }}
+            className="btn-modern-primary btn-glow hover-lift"
             disabled={loading}
           >
-            {loading ? 'Registering...' : 'Register as Employee'}
+            {loading ? (
+              <>
+                <span className="spinner"></span>
+                Registering...
+              </>
+            ) : (
+              'Register as Employee'
+            )}
           </button>
         </form>
 
-        <div style={{
-          marginTop: '15px',
-          textAlign: 'center',
-          fontSize: '14px'
-        }}>
+        <div className="login-footer">
           Already have an account?{' '}
-          <Link to="/login" style={{ color: '#4a90d9' }}>
+          <Link to="/login" className="link-modern">
             Login here
           </Link>
         </div>
-
       </div>
     </div>
   );

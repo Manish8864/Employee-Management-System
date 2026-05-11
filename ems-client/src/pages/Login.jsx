@@ -78,18 +78,7 @@ const Login = () => {
             )}
           </button>
         </form>
-        <div className="demo-creds-modern">
-          <h4>Demo Credentials</h4>
-          <div className="demo-item">
-            <strong>Manager:</strong> <code>manager@ems.com</code> / <code>manager123</code>
-          </div>
-          <div className="demo-item">
-            <strong>Employee:</strong> <code>john@ems.com</code> / <code>employee123</code>
-          </div>
-          <div className="demo-item">
-            <strong>Employee ID:</strong> <code>EMP3629JO</code>
-          </div>
-        </div>
+
         <div className="login-footer">
           Don't have an account? <Link to="/register" className="link-modern">Register here</Link>
         </div>

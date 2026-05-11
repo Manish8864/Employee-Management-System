@@ -10,11 +10,21 @@ const seedData = async () => {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('Connected to MongoDB');
 
+    // One manager seed account for first-time usage (DO NOT display credentials in UI)
     const users = [
-      { name: 'Manager Admin', email: 'manager@ems.com', password: 'manager123', role: 'manager', department: 'Management', phone: '9876543210', address: 'Head Office' }
+      {
+        name: 'Manager Admin',
+        email: 'manager@ems.com',
+        password: 'manager123',
+        role: 'manager',
+        department: 'Management',
+        phone: '9876543210',
+        address: 'Head Office'
+      }
     ];
 
     for (const u of users) {
+
       const existing = await User.findOne({ email: u.email });
       if (existing) {
         console.log('Skipped: ' + u.email + ' (exists)');

@@ -1,56 +1,66 @@
-# Deploy on Render (two services: Frontend + Backend)
+# Deploy on Render (Frontend + Backend)
 
 This project contains:
 - **Backend API**: `ems-server/` (Express + Mongoose)
 - **Frontend**: `ems-client/` (Vite + React)
 
+---
+
 ## 1) Backend service (API)
 
-### Build command
-Render usually runs `npm install` + `npm run start`.
+### Build / Start
+Render typically runs `npm install` then starts your app.
 - **Build command**: `npm install`
 - **Start command**: `node server.js`
 
-In `ems-server/package.json` the `start` script is already `node server.js`.
+(Already matches `ems-server/package.json`.)
 
 ### Environment variables
-Create environment variables in Render:
-- `MONGO_URI` = your MongoDB connection string
-- `JWT_SECRET` = any strong secret string
-- `PORT` = (optional) `5000`
+Set these in Render:
+- `MONGO_URI` = your MongoDB connection string (Atlas recommended)
+- `JWT_SECRET` = a strong random string
+- `PORT` = optional (defaults to `5000`)
 
-You can copy the template from `ems-server/.env.example`.
+### CORS note
+`ems-server/server.js` uses `app.use(cors())`.
+If you want to restrict origins later, set up CORS with an allowlist.
 
-### MongoDB
-Connect using Atlas or another hosted Mongo.
+---
 
 ## 2) Frontend service (Vite)
 
-### Important (so API calls work)
-Your frontend currently calls:
-- `baseURL: '/api'` (relative to the frontend host)
+### API base URL (required in production)
+The frontend uses:
+- `import.meta.env.VITE_API_BASE_URL || '/api'`
 
-That means the frontend must either:
-- be deployed with **Render/rewrites** so `/api/*` proxies to the backend domain, OR
-- use a different baseURL that points to your backend URL.
+So for production you should set:
+- `VITE_API_BASE_URL=https://YOUR_BACKEND.onrender.com/api`
 
-The easiest production approach is to update the frontend API baseURL to use an env var like:
-- `VITE_API_BASE_URL`
+This avoids relying on `/api` rewrites/proxying.
 
-### Recommended changes for production
-The frontend calls `VITE_API_BASE_URL`.
+### Build / Start
+- **Build command**: `npm install && npm run build`
+- **Start/Serve** (depends on Render plan):
+  - Static Web Service: serve `ems-client/dist`
+  - Web Service: `npx serve dist -l 3000`
 
-Set this in Render (frontend service) to something like:
-- `https://YOUR_BACKEND.onrender.com/api`
+---
 
-## 3) Code changes implemented
-- Updated `ems-client/src/api/axios.js` to use `import.meta.env.VITE_API_BASE_URL || '/api'`.
+## 3) What was fixed for deployment readiness
+- Frontend API client is production-safe via `VITE_API_BASE_URL`.
+- Backend routes are mounted under `/api/*`.
 - Added `ems-client/.env.example`.
 
-## 4) Build command
-- **Build command** (frontend): `npm install && npm run build`
-- **Start command**: Render can serve the built static site. Depending on Render plan/type, typical is:
-  - if using a Static Web Service: serve `ems-client/dist`
-  - if using a Web Service: run `npx serve dist -l 3000`
+---
+
+## 4) Quick local production sanity checks
+
+Backend:
+- `cd ems-server && npm install && npm start`
+
+Frontend:
+- `cd ems-client && npm install && npm run build`
+- `npm run preview`
+
 
 
