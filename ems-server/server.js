@@ -24,15 +24,7 @@ console.log(
     app.use(express.urlencoded({ extended: true, limit: '10mb' }));
     app.use('/uploads', express.static('uploads'));
 
-    // Test Routes
-app.get('/', (req, res) => {
-  res.send('Backend is running 🚀');
-});
-
-app.get('/api', (req, res) => {
-  res.send('API is working ✅');
-});
-
+    
     // Routes
     app.use('/api/auth', require('./routes/authRoutes'));
     app.use('/api/employees', require('./routes/employeeRoutes'));
