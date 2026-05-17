@@ -25,6 +25,12 @@ console.log(
     app.use('/uploads', express.static('uploads'));
 
     
+
+    // Root route (health check)
+    app.get('/', (req, res) => {
+      res.status(200).json({ message: 'API running' });
+    });
+
     // Routes
     app.use('/api/auth', require('./routes/authRoutes'));
     app.use('/api/employees', require('./routes/employeeRoutes'));
