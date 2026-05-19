@@ -3,7 +3,7 @@ import axios from 'axios';
 // IMPORTANT:
 // In production (Render), we must explicitly point to the BACKEND host.
 // If VITE_API_BASE_URL is not set, defaulting to `/api` will hit the FRONTEND domain and cause 404.
-const apiBaseURL = import.meta.env.VITE_API_BASE_URL;
+const apiBaseURL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 const api = axios.create({
   baseURL: apiBaseURL,
