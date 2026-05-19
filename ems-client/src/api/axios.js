@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const apiBaseURL = import.meta.env.VITE_API_BASE_URL || '/api';
+// IMPORTANT:
+// In production (Render), we must explicitly point to the BACKEND host.
+// If VITE_API_BASE_URL is not set, defaulting to `/api` will hit the FRONTEND domain and cause 404.
+const apiBaseURL = import.meta.env.VITE_API_BASE_URL;
 
 const api = axios.create({
   baseURL: apiBaseURL,
@@ -19,4 +22,5 @@ api.interceptors.request.use((config) => {
 });
 
 export default api;
+
 
