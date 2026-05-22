@@ -111,7 +111,7 @@ const AllManagers = () => {
     if (!avatar) {
       return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'M')}&size=128&background=7c3aed&color=fff`;
     }
-    return avatar.startsWith('http') ? avatar : `http://localhost:5000${avatar}`;
+    return avatar.startsWith('http') ? avatar : `${import.meta.env.VITE_API_BASE_URL || ''}${avatar}`;
   };
 
   const getDepartmentColor = (dept) => {

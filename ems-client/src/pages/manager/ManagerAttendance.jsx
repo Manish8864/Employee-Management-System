@@ -43,7 +43,7 @@ const ManagerAttendance = () => {
       setTimeout(() => {
         const map = window.L.map(mapRef.current).setView([latitude, longitude], 16);
         window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap'
+          attribution: 'ï¿½ OpenStreetMap'
         }).addTo(map);
         window.L.marker([latitude, longitude]).addTo(map)
           .bindPopup(locationType).openPopup();
@@ -80,7 +80,7 @@ const ManagerAttendance = () => {
 
   const getAvatarUrl = (avatar, name) => {
     if (avatar) {
-      return avatar.startsWith('http') ? avatar : `http://localhost:5000${avatar}`;
+      return avatar.startsWith('http') ? avatar : `${import.meta.env.VITE_API_BASE_URL || ''}${avatar}`;
     }
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'E')}&size=64&background=4F46E5&color=fff`;
   };

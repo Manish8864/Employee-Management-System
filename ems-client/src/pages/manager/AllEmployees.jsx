@@ -59,7 +59,7 @@ const AllEmployees = () => {
     if (!avatar) {
       return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'E')}&size=128&background=4F46E5&color=fff`;
     }
-    return avatar.startsWith('http') ? avatar : `http://localhost:5000${avatar}`;
+    return avatar.startsWith('http') ? avatar : `${import.meta.env.VITE_API_BASE_URL || ''}${avatar}`;
   };
 
   const getDepartmentColor = (dept) => {
