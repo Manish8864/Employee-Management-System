@@ -17,6 +17,20 @@ const AllManagers = () => {
   const [profileMsg, setProfileMsg] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
+  const MAX_MANAGERS = 5;
+
+  const [showAddManagerModal, setShowAddManagerModal] = useState(false);
+  const [addManagerLoading, setAddManagerLoading] = useState(false);
+  const [addManagerForm, setAddManagerForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    department: '',
+    phone: '',
+    address: ''
+  });
+  const [addManagerMsg, setAddManagerMsg] = useState('');
+
   const fetchManagers = async () => {
     try {
       setLoading(true);
@@ -107,6 +121,34 @@ const AllManagers = () => {
     }
   };
 
+  const handleAddManagerChange = (e) => {
+    setAddManagerForm({ ...addManagerForm, [e.target.name]: e.target.value });
+  };
+
+  const handleAddManagerSubmit = async (e) => {
+    e.preventDefault();
+    setAddManagerMsg('');
+
+    if (managers.length >= MAX_MANAGERS) {
+      setAddManagerMsg(`Maximum ${MAX_MANAGERS} managers allowed`);
+      return;
+    }
+
+    setAddManagerLoading(true);
+    try {
+      await api.post('/auth/add-manager', addManagerForm);
+      setAddManagerMsg('Manager added successfully');
+      setShowAddManagerModal(false);
+      setAddManagerForm({ name: '', email: '', password: '', department: '', phone: '', address: '' });
+      fetchManagers();
+      setTimeout(() => setAddManagerMsg(''), 3000);
+    } catch (err) {
+      setAddManagerMsg(err.response?.data?.message || 'Failed to add manager');
+    } finally {
+      setAddManagerLoading(false);
+    }
+  };
+
   const getAvatarUrl = (avatar, name) => {
     if (!avatar) {
       return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'M')}&size=128&background=7c3aed&color=fff`;
@@ -145,7 +187,19 @@ const AllManagers = () => {
       <div className="page-header-modern">
         <div className="header-left">
           <h1 className="dashboard-title">All Managers</h1>
-          <p className="header-subtitle">{filteredManagers.length} managers total</p>
+          <p className="header-subtitle">{managers.length} / 5 managers total</p>
+        </div>
+
+        <div className="header-right">
+          <button
+            className="btn btn-primary-modern"
+            disabled={managers.length >= 5 || loading}
+            onClick={() => setShowAddManagerModal(true)}
+            style={{ opacity: managers.length >= 5 ? 0.6 : 1 }}
+            title={managers.length >= 5 ? 'Maximum 5 managers allowed' : 'Add a new manager'}
+          >
+            + Add Manager
+          </button>
         </div>
       </div>
 
@@ -174,6 +228,93 @@ const AllManagers = () => {
           />
         </div>
       </div>
+
+      {showAddManagerModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => {
+            setShowAddManagerModal(false);
+            setAddManagerMsg('');
+          }}
+        >
+          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-title-section">
+                <h2>Add Manager</h2>
+                <span className="role-badge manager">Manager</span>
+              </div>
+              <button
+                className="modal-close"
+                onClick={() => {
+                  setShowAddManagerModal(false);
+                  setAddManagerMsg('');
+                }}
+              >
+                X
+              </button>
+            </div>
+
+            <div className="modal-body">
+              {addManagerMsg && (
+                <div className={addManagerMsg.toLowerCase().includes('maximum') ? 'alert alert-error-modern' : 'alert alert-success-modern'} style={{ marginBottom: '20px' }}>
+                  <span className="alert-icon">{addManagerMsg.toLowerCase().includes('maximum') ? 'X' : 'OK'}</span>
+                  {addManagerMsg}
+                </div>
+              )}
+
+              <form onSubmit={handleAddManagerSubmit}>
+                <div className="form-group-modern">
+                  <label className="label-modern">Name <span className="required">*</span></label>
+                  <input type="text" name="name" className="input-modern" value={addManagerForm.name} onChange={handleAddManagerChange} required />
+                </div>
+
+                <div className="form-group-modern">
+                  <label className="label-modern">Email <span className="required">*</span></label>
+                  <input type="email" name="email" className="input-modern" value={addManagerForm.email} onChange={handleAddManagerChange} required />
+                </div>
+
+                <div className="form-group-modern">
+                  <label className="label-modern">Password <span className="required">*</span></label>
+                  <input type="password" name="password" className="input-modern" value={addManagerForm.password} onChange={handleAddManagerChange} required minLength="6" />
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group-modern">
+                    <label className="label-modern">Department</label>
+                    <input type="text" name="department" className="input-modern" value={addManagerForm.department} onChange={handleAddManagerChange} />
+                  </div>
+                  <div className="form-group-modern">
+                    <label className="label-modern">Phone</label>
+                    <input type="text" name="phone" className="input-modern" value={addManagerForm.phone} onChange={handleAddManagerChange} />
+                  </div>
+                </div>
+
+                <div className="form-group-modern">
+                  <label className="label-modern">Address</label>
+                  <textarea name="address" className="input-modern textarea-modern" rows="3" value={addManagerForm.address} onChange={handleAddManagerChange} />
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+                  <button type="submit" className="btn btn-primary-modern" disabled={addManagerLoading || managers.length >= MAX_MANAGERS}>
+                    {addManagerLoading ? 'Adding...' : '+ Add Manager'}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary-modern"
+                    onClick={() => {
+                      setShowAddManagerModal(false);
+                      setAddManagerMsg('');
+                    }}
+                    disabled={addManagerLoading}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="card card-modern">
         <div className="table-wrapper">

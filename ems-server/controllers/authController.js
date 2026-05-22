@@ -18,13 +18,43 @@ exports.register = async (req, res) => {
 // @desc    Add new manager (Manager only)
 exports.addManager = async (req, res) => {
   try {
+    const MAX_MANAGERS = 5;
+
+    const currentManagersCount = await User.countDocuments({ role: 'manager' });
+    if (currentManagersCount >= MAX_MANAGERS) {
+      return res.status(400).json({ message: `Maximum ${MAX_MANAGERS} managers allowed` });
+    }
+
     const { name, email, password, department, phone, address } = req.body;
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ message: 'User already exists' });
+
     const generatedName = name || email.split('@')[0];
-    const user = await User.create({ name: generatedName, email, password, role: 'manager', department, phone, address });
-    res.status(201).json({ message: 'Manager added successfully', user: { id: user._id, name: user.name, email: user.email, role: user.role, department: user.department, phone: user.phone, address: user.address } });
-  } catch (error) { res.status(500).json({ message: error.message }); }
+    const user = await User.create({
+      name: generatedName,
+      email,
+      password,
+      role: 'manager',
+      department,
+      phone,
+      address
+    });
+
+    res.status(201).json({
+      message: 'Manager added successfully',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        department: user.department,
+        phone: user.phone,
+        address: user.address
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 
