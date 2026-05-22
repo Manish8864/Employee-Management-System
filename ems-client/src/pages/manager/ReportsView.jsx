@@ -72,7 +72,7 @@ const ReportsView = () => {
           <p className="header-subtitle">{filteredReports.length} reports total</p>
         </div>
         <button className="btn btn-secondary-modern" onClick={fetchReports}>
-          <span>R</span> Refresh
+          <span className="refresh-r">R</span> Refresh
         </button>
       </div>
 
