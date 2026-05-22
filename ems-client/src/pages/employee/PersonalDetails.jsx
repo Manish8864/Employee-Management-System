@@ -155,8 +155,9 @@ const PersonalDetails = () => {
   };
 
   const getAvatarUrl = (avatar) => {
-    if (!avatar) return `https://ui-avatars.com/api/?name=${encodeURIComponent(details?.name || 'E')}&size=128&background=4F46E5&color=fff`;
-    if (avatar.startsWith('/uploads')) return `${import.meta.env.VITE_API_BASE_URL || ''}${avatar}`;
+    if (!avatar)
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(details?.name || 'E')}&size=128&background=4F46E5&color=fff`;
+    if (avatar.startsWith('/uploads')) return `${import.meta.env.VITE_UPLOADS_BASE_URL || ''}${avatar}`;
     return avatar;
   };
 

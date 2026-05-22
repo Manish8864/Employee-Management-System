@@ -80,7 +80,7 @@ const ManagerAttendance = () => {
 
   const getAvatarUrl = (avatar, name) => {
     if (avatar) {
-      return avatar.startsWith('http') ? avatar : `${import.meta.env.VITE_API_BASE_URL || ''}${avatar}`;
+      return avatar.startsWith('http') ? avatar : `${import.meta.env.VITE_UPLOADS_BASE_URL || ''}${avatar}`;
     }
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'E')}&size=64&background=4F46E5&color=fff`;
   };
