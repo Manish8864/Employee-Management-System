@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
@@ -28,12 +28,27 @@ import Notifications from './pages/manager/Notifications';
 
 const DashboardLayout = ({ children }) => {
   const { user } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   if (!user) return <Navigate to="/login" />;
 
   return (
     <div className="dashboard-layout">
-      <Sidebar />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="main-content-modern">
+        {sidebarOpen && (
+          <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+        )}
+        <button
+          className="mobile-menu-toggle"
+          aria-label={sidebarOpen ? 'Close menu' : 'Open menu'}
+          onClick={() => setSidebarOpen((prev) => !prev)}
+        >
+          <svg className="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
         {children}
       </div>
     </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen = false, onClose }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const isActive = (path) => location.pathname === path ? 'active' : '';
@@ -30,7 +30,7 @@ const Sidebar = () => {
   const links = user?.role === 'manager' ? managerLinks : employeeLinks;
 
   return (
-    <div className="sidebar-modern">
+    <div className={`sidebar-modern ${isOpen ? 'sidebar-open' : ''}`}>
       <div className="sidebar-header-modern">
         <div className="logo-modern">EMS Portal</div>
         <div className="user-info-modern">
@@ -42,7 +42,7 @@ const Sidebar = () => {
         <ul className="sidebar-menu-modern">
           {links.map(link => (
             <li key={link.to} className={isActive(link.to)}>
-              <Link to={link.to} className="sidebar-link-modern">
+              <Link to={link.to} className="sidebar-link-modern" onClick={onClose}>
                 <span className="link-icon">{link.icon}</span>
                 <span>{link.label}</span>
               </Link>
@@ -52,7 +52,7 @@ const Sidebar = () => {
       </div>
       <div className="logout-section">
         <li className="logout-item-modern">
-          <a onClick={logout} className="sidebar-link-modern logout-link-modern">
+          <a onClick={() => { logout(); onClose?.(); }} className="sidebar-link-modern logout-link-modern">
             <span className="link-icon">🚪</span>
             <span>Logout</span>
           </a>
